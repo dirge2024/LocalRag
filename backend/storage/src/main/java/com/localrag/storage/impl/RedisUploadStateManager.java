@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,16 +31,14 @@ public class RedisUploadStateManager implements UploadStateManager {
         String key = KEY_PREFIX + task.getMd5();
         Boolean ok = redisTemplate.opsForHash().putIfAbsent(key, "md5", task.getMd5());
         if (Boolean.TRUE.equals(ok)) {
-            Map<String, String> fields = Map.of(
-                    "md5", task.getMd5(),
-                    "fileName", task.getFileName(),
-                    "fileSize", String.valueOf(task.getFileSize()),
-                    "uploadId", task.getUploadId(),
-                    "bucket", task.getBucket(),
-                    "objectKey", task.getObjectKey(),
-                    "totalParts", String.valueOf(task.getTotalParts()),
-                    "status", task.getStatus().name()
-            );
+            Map<String, String> fields = new HashMap<>();
+            fields.put("md5", task.getMd5());
+            fields.put("fileName", task.getFileName());
+            fields.put("fileSize", String.valueOf(task.getFileSize()));
+            fields.put("bucket", task.getBucket());
+            fields.put("objectKey", task.getObjectKey());
+            fields.put("totalParts", String.valueOf(task.getTotalParts()));
+            fields.put("status", task.getStatus().name());
             redisTemplate.opsForHash().putAll(key, fields);
             redisTemplate.expire(key, Duration.ofHours(TTL_HOURS));
             log.info("upload task created: md5={}", task.getMd5());
