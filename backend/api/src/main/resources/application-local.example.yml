@@ -1,0 +1,8 @@
+# 复制此文件为 application-local.yml，填入真实 Key
+# cp application-local.example.yml application-local.yml
+localrag:
+  embedding:
+    qwen:
+      api-key: sk-你的通义千问key
+    deepseek:
+      api-key: sk-你的deepseek-key
