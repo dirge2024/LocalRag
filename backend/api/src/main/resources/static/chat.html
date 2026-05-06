@@ -71,15 +71,15 @@ async function newChat() {
 }
 
 (async function init() {
-    if (!sessionId) {
-        const r = await fetch('/api/llm/sessions', { method: 'POST' });
-        const d = await r.json();
-        if (d.code === 200 && d.data) {
-            sessionId = d.data.sessionId;
-            history.replaceState(null, '', '?session=' + sessionId);
-        }
+    if (sessionId) { loadHistory(); return; }
+    // 没有指定会话 → 加载最近一个已有会话
+    const r = await fetch('/api/llm/sessions');
+    const d = await r.json();
+    if (d.code === 200 && d.data && d.data.length > 0) {
+        sessionId = d.data[0].sessionId;
+        history.replaceState(null, '', '?session=' + sessionId);
+        loadHistory();
     }
-    if (sessionId) loadHistory();
 })();
 
 function send() {
