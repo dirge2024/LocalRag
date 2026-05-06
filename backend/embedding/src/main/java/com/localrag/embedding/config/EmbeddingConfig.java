@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "localrag.embedding")
 public class EmbeddingConfig {
     private String provider = "qwen";
-    private int batchSize = 25;
+    private int batchSize = 10;
     private int dimension = 2048;
     private int connectTimeout = 10;
     private int readTimeout = 30;
