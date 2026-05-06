@@ -64,6 +64,13 @@ checkHealth(); setInterval(checkHealth, 30000);
         if (d.code === 200 && d.data && d.data.length > 0) {
             sessionId = d.data[0].sessionId;
             history.replaceState(null, '', '?session=' + sessionId);
+        } else {
+            const cr = await fetch('/api/llm/sessions', { method: 'POST' });
+            const cd = await cr.json();
+            if (cd.code === 200 && cd.data) {
+                sessionId = cd.data.sessionId;
+                history.replaceState(null, '', '?session=' + sessionId);
+            }
         }
     }
     if (sessionId) loadHistory();
@@ -99,12 +106,25 @@ function send() {
     box.scrollTop = box.scrollHeight;
 
     let finished = false;
-    const es = new EventSource('/api/llm/chat?query=' + encodeURIComponent(query) + '&sessionId=' + sessionId);
+    const url = '/api/llm/chat?query=' + encodeURIComponent(query) + '&sessionId=' + sessionId;
+    const es = new EventSource(url);
     es.onmessage = function(e) {
         if (finished) return;
-        try { const d = JSON.parse(e.data); if (d.done) { es.close(); done(); return; } if (d.content) { assistantDiv.textContent += d.content; box.scrollTop = box.scrollHeight; } } catch(x) {}
+        try {
+            const d = JSON.parse(e.data);
+            if (d.done) { es.close(); done(); return; }
+            if (d.content) { assistantDiv.textContent += d.content; box.scrollTop = box.scrollHeight; }
+        } catch(x) {}
     };
-    es.onerror = function() { if (finished) return; es.close(); if (assistantDiv.textContent.length === 0) { assistantDiv.textContent = '连接中断'; assistantDiv.className = 'msg error'; } done(); };
+    es.onerror = function() {
+        if (finished) return;
+        if (assistantDiv.textContent.length === 0) {
+            assistantDiv.textContent = '连接中断，请重试';
+            assistantDiv.className = 'msg error';
+        }
+        es.close();
+        done();
+    };
     function done() { if (finished) return; finished = true; sendLock = false; streaming = false; document.getElementById('btnSend').disabled = false; assistantDiv.classList.remove('typing'); }
 }
 
