@@ -6,6 +6,8 @@ import com.localrag.llm.config.LlmConfig;
 import com.localrag.llm.contract.LlmService;
 import com.localrag.retrieval.contract.RetrievalService;
 import com.localrag.retrieval.model.RetrievalResult;
+import com.localrag.storage.contract.FileMetadataRepository;
+import com.localrag.storage.model.FileMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -32,6 +34,7 @@ public class DeepSeekLlmService implements LlmService {
     private final RetrievalService retrievalService;
     private final PromptBuilder promptBuilder;
     private final ChatHistoryManager chatHistoryManager;
+    private final FileMetadataRepository fileMetadataRepository;
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -50,7 +53,23 @@ public class DeepSeekLlmService implements LlmService {
                 List<com.localrag.llm.model.ChatHistoryMessage> history =
                         chatHistoryManager.getRecent(sessionId);
 
-                String prompt = promptBuilder.build(query, chunks, history);
+                java.util.HashMap<String, String> md5ToFileName = new java.util.HashMap<>();
+                for (var chunk : chunks) {
+                    if (!md5ToFileName.containsKey(chunk.getMd5())) {
+                        FileMetadata meta = fileMetadataRepository.findByMd5(chunk.getMd5());
+                        md5ToFileName.put(chunk.getMd5(),
+                                meta != null ? meta.getFileName() : chunk.getMd5().substring(0, 8));
+                    }
+                }
+
+                String prompt = promptBuilder.build(query, chunks, history, md5ToFileName);
+
+                if (chunks.isEmpty()) {
+                    emitter.send(SseEmitter.event().data(
+                            Map.of("content", "未找到相关信息。请先上传相关文档到知识库。", "done", true)));
+                    emitter.complete();
+                    return;
+                }
 
                 Map<String, Object> body = Map.of(
                         "model", config.getDeepseek().getModel(),

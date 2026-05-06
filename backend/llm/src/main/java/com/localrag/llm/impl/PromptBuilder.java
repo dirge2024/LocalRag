@@ -5,18 +5,27 @@ import com.localrag.retrieval.model.RetrievalResult;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class PromptBuilder {
 
-    public String build(String query, List<RetrievalResult> chunks, List<ChatHistoryMessage> history) {
+    public String build(String query, List<RetrievalResult> chunks,
+                        List<ChatHistoryMessage> history, Map<String, String> md5ToFileName) {
         StringBuilder sb = new StringBuilder();
-        sb.append("你是 LocalRAG 知识库助手。只根据【参考资料】回答，不要编造。\n\n");
+        sb.append("你是 LocalRAG 知识库助手。严格遵守以下规则：\n");
+        sb.append("1. 只根据【参考资料】回答，参考资料中没有的直接说「未找到相关信息」\n");
+        sb.append("2. 不要编造、猜测、补充任何外部知识\n");
+        sb.append("3. 回答末尾必须标注引用来源，格式：(来源N: 文件名)\n\n");
 
         if (!chunks.isEmpty()) {
             sb.append("【参考资料】\n");
+            int idx = 1;
             for (var chunk : chunks) {
+                String fileName = md5ToFileName.getOrDefault(chunk.getMd5(), "未知文件");
+                sb.append("[来源").append(idx).append(": ").append(fileName).append("]\n");
                 sb.append(chunk.getText()).append("\n\n");
+                idx++;
             }
         }
 
