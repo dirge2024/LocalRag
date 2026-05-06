@@ -79,7 +79,8 @@ public class DeepSeekLlmService implements LlmService {
                     }
 
                     BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(response.body().byteStream()));
+                            new InputStreamReader(response.body().byteStream(),
+                                    java.nio.charset.StandardCharsets.UTF_8));
                     String line;
                     StringBuilder fullAnswer = new StringBuilder();
 
