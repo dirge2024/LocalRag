@@ -37,7 +37,7 @@ graph LR
 
 ## 系统功能
 <!-- SCREENSHOT: 系统运行时截图 -->
-![alt text](image-1.png)
+![alt text](系统功能展示.png)
 
 ## 技术栈
 
@@ -262,4 +262,4 @@ cp -r impeccable/.agents/skills/impeccable .claude/skills/
 
 ## 开发记录
 
-开发过程中记录了 10 个典型问题及排查解决过程，详见 `需求分析/开发问题.md`。
+开发过程中记录了 10 个典型问题及排查解决过程，详见 `doc/开发问题.md`。
