@@ -106,6 +106,7 @@ function loadHistory() {
     fetch('/api/llm/history?sessionId=' + sessionId)
         .then(r => r.json())
         .then(d => {
+            document.getElementById('chatBox').innerHTML = '';
             if (d.code === 200 && d.data) {
                 d.data.forEach(msg => appendMessage(msg.role, msg.content));
             }
