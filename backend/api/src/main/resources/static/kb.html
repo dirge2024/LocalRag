@@ -4,48 +4,55 @@
 <meta charset="UTF-8">
 <title>知识库 — LocalRAG</title>
 <style>
+:root {
+  --primary: #6366f1; --primary-hover: #4f46e5;
+  --bg: #f1f5f9; --card: #fff; --text: #1e293b; --text-muted: #64748b;
+  --sidebar-bg: #0f172a; --sidebar-text: #94a3b8; --sidebar-active: #1e293b;
+  --radius: 10px;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #333; display: flex; min-height: 100vh; }
-.sidebar { width: 220px; background: #1e1e2e; color: #cdd6f4; display: flex; flex-direction: column; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; }
-.sidebar h2 { padding: 0 20px 20px; font-size: 18px; color: #fff; border-bottom: 1px solid #313244; }
-.sidebar nav { flex: 1; padding: 10px 0; }
-.sidebar a { display: block; padding: 10px 20px; color: #a6adc8; text-decoration: none; font-size: 14px; transition: .15s; }
-.sidebar a:hover, .sidebar a.active { background: #313244; color: #fff; }
-.sidebar .divider { border-top: 1px solid #313244; margin: 10px 16px; }
-.sidebar .info { padding: 10px 20px; font-size: 12px; color: #585b70; }
-.main { margin-left: 220px; flex: 1; padding: 24px 32px; }
-h3 { margin-bottom: 16px; }
-.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px 24px; margin-bottom: 16px; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.6; }
+.sidebar { width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; }
+.sidebar .logo { padding: 0 24px 20px; font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid #1e293b; }
+.sidebar nav { flex: 1; padding: 12px 0; }
+.sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 24px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 500; margin: 2px 12px; border-radius: 8px; transition: .15s; }
+.sidebar a:hover { background: var(--sidebar-active); color: #e2e8f0; }
+.sidebar a.active { background: var(--primary); color: #fff; }
+.sidebar .footer { padding: 16px 24px; font-size: 11px; color: #475569; border-top: 1px solid #1e293b; }
+.main { margin-left: 240px; flex: 1; padding: 32px 40px; max-width: 1100px; }
+h2 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
+.sub { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px 0 rgba(0,0,0,.04); padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
-th { font-weight: 600; color: #6b7280; font-size: 12px; text-transform: uppercase; }
-.status { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+th { text-align: left; padding: 12px 14px; border-bottom: 2px solid #e2e8f0; font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+.status { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
 .status-uploading { background: #dbeafe; color: #1e40af; }
 .status-ready { background: #fef3c7; color: #92400e; }
 .status-chunked { background: #ffedd5; color: #9a3412; }
 .status-embedded { background: #d1fae5; color: #065f46; }
 .status-deleted { background: #fee2e2; color: #991b1b; }
-.btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
-.btn-danger { background: #fee2e2; color: #991b1b; } .btn-danger:hover { background: #fecaca; }
+.btn { padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: .15s; }
+.btn-refresh { background: var(--primary); color: #fff; font-size: 13px; padding: 8px 18px; margin-bottom: 16px; border-radius: 8px; cursor: pointer; border: none; } .btn-refresh:hover { background: var(--primary-hover); }
 .btn-dl { background: #e0e7ff; color: #3730a3; text-decoration: none; } .btn-dl:hover { background: #c7d2fe; }
-.empty { text-align: center; color: #9ca3af; padding: 40px 0; font-size: 14px; }
-.refresh { margin-bottom: 16px; }
+.btn-danger { background: #fee2e2; color: #991b1b; } .btn-danger:hover { background: #fecaca; }
+.empty { text-align: center; color: var(--text-muted); padding: 40px 0; font-size: 14px; }
 </style>
 </head>
 <body>
 <div class="sidebar">
-    <h2>LocalRAG</h2>
+    <div class="logo">LocalRAG</div>
     <nav>
         <a href="/upload.html">📤 文件上传</a>
         <a href="/kb.html" class="active">📚 知识库</a>
         <a href="/chat.html">💬 对话</a>
     </nav>
-    <div class="divider"></div>
-    <div class="info">ES: localhost:9200<br>MinIO: localhost:19001<br>Kafka: localhost:9092</div>
+    <div class="footer">ES :9200 · MinIO :19001<br>Kafka :9092 · MySQL :3307</div>
 </div>
 <div class="main">
-    <h3>📚 知识库</h3>
-    <button class="btn btn-dl refresh" onclick="loadFiles()" style="font-size:13px;padding:8px 16px;">🔄 刷新</button>
+    <h2>📚 知识库</h2>
+    <p class="sub">已上传文件及处理状态</p>
+    <button class="btn-refresh" onclick="loadFiles()">🔄 刷新列表</button>
     <div class="card">
         <table>
             <thead><tr><th>文件名</th><th>MD5</th><th>大小</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
@@ -57,17 +64,16 @@ th { font-weight: 600; color: #6b7280; font-size: 12px; text-transform: uppercas
 async function loadFiles(){
     const tbody=document.getElementById('fileList');
     try{
-        const r=await fetch('/api/storage/files');
-        const d=await r.json();
+        const r=await fetch('/api/storage/files');const d=await r.json();
         if(d.code!==200){tbody.innerHTML='<tr><td colspan="6" class="empty">加载失败</td></tr>';return;}
         const files=(d.data||[]).filter(f=>f.status!=='DELETED');
         if(files.length===0){tbody.innerHTML='<tr><td colspan="6" class="empty">暂无文件，请先上传</td></tr>';return;}
         tbody.innerHTML=files.map(f=>'<tr>'+
-            '<td>'+esc(f.fileName)+'</td>'+
-            '<td style="font-size:11px;font-family:monospace;">'+esc(f.md5).substring(0,12)+'...</td>'+
+            '<td><strong>'+esc(f.fileName)+'</strong></td>'+
+            '<td style="font-size:11px;font-family:monospace;color:var(--text-muted);">'+esc(f.md5).substring(0,12)+'...</td>'+
             '<td>'+formatSize(f.fileSize)+'</td>'+
             '<td><span class="status status-'+f.status.toLowerCase()+'">'+statusText(f.status)+'</span></td>'+
-            '<td style="font-size:12px;color:#888;">'+f.createdAt+'</td>'+
+            '<td style="font-size:12px;color:var(--text-muted);">'+f.createdAt+'</td>'+
             '<td>'+
                 '<a class="btn btn-dl" href="/api/storage/download/'+f.md5+'">下载</a> '+
                 '<button class="btn btn-danger" onclick="deleteFile(\''+f.md5+'\')">删除</button>'+
@@ -75,11 +81,7 @@ async function loadFiles(){
         '</tr>').join('');
     }catch(e){tbody.innerHTML='<tr><td colspan="6" class="empty">请求失败: '+esc(e.message)+'</td></tr>';}
 }
-async function deleteFile(md5){
-    if(!confirm('确认删除此文件？'))return;
-    await fetch('/api/storage/file/'+md5,{method:'DELETE'});
-    loadFiles();
-}
+async function deleteFile(md5){if(!confirm('确认删除此文件？'))return;await fetch('/api/storage/file/'+md5,{method:'DELETE'});loadFiles();}
 function statusText(s){const m={'UPLOADING':'上传中','READY':'已上传','CHUNKED':'已分块','EMBEDDED':'已入库','DELETED':'已删除'};return m[s]||s;}
 function formatSize(b){const KB=1024,MB=1024*KB;if(b<KB)return b+' B';if(b<MB)return(b/KB).toFixed(1)+' KB';return(b/MB).toFixed(1)+' MB';}
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
