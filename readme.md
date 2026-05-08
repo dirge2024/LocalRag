@@ -1,12 +1,12 @@
-# LocalRAG — 本地 RAG 知识库系统
+# IntraMind
 
-LocalRAG 是一个基于检索增强生成（RAG）技术的本地知识库学习项目，支持文档上传、自动解析分块、向量化存储、混合检索，内置 AI 助手「茉莉」，通过 DeepSeek / Qwen 大模型提供智能问答。
+**IntraMind** 是一个本地知识库 AI 助手，支持文档上传、自动解析分块、向量化存储、混合检索，内置 AI 助手「茉莉」，通过 DeepSeek / Qwen 大模型提供智能问答。
+
+> 代码库名为 **LocalRAG**。项目从 RAG 系统学习实践起步，逐步扩展为完整知识库产品后更名为 IntraMind（[GitHub](https://github.com/dirge2024/IntraMind)）。本地目录保留 LocalRAG 以保持既有开发环境不变。
 
 核心技术栈包括 Spring Boot 3.3.5、Elasticsearch 8.10、Kafka、MinIO、MySQL 和 Redis。
 
 ## 项目说明
-
-本仓库是我学习 RAG 系统设计的实践项目，通过完整的工程链路掌握 AI 知识库的核心原理。
 
 - 目标：从零搭建 RAG 工作流，深入理解文档处理、向量检索和 LLM 对话的全链路实现
 - 重点：文档解析与分块策略、KNN + BM25 混合检索、对话历史管理与会话持久化
